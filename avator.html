@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Aviator Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #b30000;
+            color: #333;
+            margin: 0;
+            height: 100vh;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+			}
+        .login-container, .predictor-container {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+            display: none;
+        }
+        .login-container.active, .predictor-container.active {
+            display: block;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+        . .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        .bordered-container {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 200px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 6000px;
+            width: 1000%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+            animation: none; /* Start with no animation */
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .plane {
+            width: 300px;
+            margin: 10px 0;
+            animation: none; /* Start with no animation */
+        }
+        @keyframes zoomInOut {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #e9ecef;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            padding: 20px;
+            width: 150px;
+            height: 150px;
+            line-height: 150px;
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+            overflow: hidden;
+            margin: 20px auto;
+            display: inline-block;
+        }
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 10;
+            text-align: center;
+            width: 200px;
+            height: 200px;
+        }
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1.5s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+            color: rgba(0, 0, 0, 0.1);
+            font-size: 80px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 100vh;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+        .watermark-text {
+            display: inline-block;
+            transform: rotate(-30deg);
+        }
+        select {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #fff;
+            color: #333;
+            width: 150px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .history-container {
+            margin-top: 20px;
+            text-align: center;
+			 width: 2200px;
+			 position: absolute;
+            top: 20px;
+            right: 20px
+        }
+
+        .history-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+
+        .history-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 5px;
+            font-size: 18px;
+            color: #333;
+            display: inline-block;
+        }
+
+        .history-item span {
+            font-weight: bold;
+        }
+
+        .history-list.hidden {
+            display: none;
+        }
+
+        .terms-button {
+             position: absolute;
+            bottom: 200px;
+           left: 255px;
+            background-color: #007bff;
+            color: white;
+			 width: 110px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .terms-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            width: 400px;
+            z-index: 100;
+            text-align: left;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .terms-popup h2 {
+            margin-top: 0;
+        }
+
+        .close-terms {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container active" id="loginContainer">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p class="error-message" id="error-message">Invalid username or password</p>
+</div>
+
+<div class="predictor-container" id="predictorContainer">
+<div class="wrapper">
+    
+        <button class="terms-button" id="termsButton">Terms and Conditions</button>
+        <div class="terms-popup" id="termsPopup">
+            <button class="close-terms" id="closeTerms">X</button>
+            <h2>Terms and Conditions for Aviator Predictions App</h2>
+            <p><strong>Effective Date:</strong> [2024]</p>
+            <p>Welcome to the Aviator Predictions App. By using our App, you agree to comply with and be bound by the following terms and conditions. Please read them carefully before using our App.</p>
+            <h3>1. Acceptance of Terms</h3>
+            <p>By accessing or using the App, you agree to these Terms and Conditions ("Terms"). If you do not agree to these Terms, you must not use the App.</p>
+            <h3>2. Use of the PREDICTOR</h3>
+            <p><strong>a. Eligibility:</strong> You must be at least 18 years old or of legal age in your jurisdiction to use the PREDICTOR. By using the App, you represent and warrant that you meet these requirements.</p>
+            <p><strong>b. Account Registration:</strong> To access certain features, you may be required to create an account. You agree to provide accurate, current, and complete information during the registration process and to update such information to keep it accurate, current, and complete.</p>
+            <p><strong>c. User Responsibilities:</strong> You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to notify us immediately of any unauthorized use of your account or any other breach of security.</p>
+            <h3>3. Predictions and Results</h3>
+            <p><strong>a. Accuracy:</strong> The predictions provided by the App are based on algorithms and data analysis. However, we do not guarantee that the predictions are 100% accurate or reliable. The results should be used for informational purposes only and are not intended to be used as definitive forecasts.</p>
+            <p><strong>b. No Warranties:</strong> The App is provided "as is" without any warranties, express or implied. We disclaim all warranties, including but not limited to implied warranties of merchantability and fitness for a particular purpose.</p>
+            <p><strong>c. Purpose:</strong> The predictor feature of the App is designed to provide a tool for leading CSS coding and user experimentation. It is not intended to provide precise or guaranteed results and should not be relied upon as a sole basis for any decision-making.</p>
+        </div>
+    <img src="logo.png" class="logo" alt="Aviator Logo" id="logo"><br>
+        <img src="plane.png" alt="Flying Plane" class="plane" id="plane"><br>
+        <h1><strong>AVIATOR PREDICTOR</strong></h1>
+		
+   <div class="result" id="resultDisplay">
+            <span id="resultButton">Result will appear here</span>
+        </div>
+        <button id="predictButton">Predict Next Round</button>
+        <button id="historyButton">Show/Hide History</button>
+        <div class="loading" id="loadingText">
+            <div class="spinner"></div>
+            <p id="rumorsText">Loading...</p>
+        </div>
+    <div class="history-container">
+            <h2>History</h2>
+            <ul class="history-list" id="historyList">
+                <!-- History items will be inserted here dynamically -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function login() {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+
+        if (username === 'k' && password === 'k') {
+            document.getElementById('loginContainer').classList.remove('active');
+            document.getElementById('predictorContainer').classList.add('active');
+        } else {
+            document.getElementById('error-message').style.display = 'block';
+        }
+    }
+
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    const results = [
+        '1.41X', '1.50X', '1.41X', '5.87X',
+        '4.37X', '1.20X', '1.95X', '1.62X',
+        '1.30X', '2.38X', '1.30X', '1.95X',
+        '1.80X'
+    ];
+
+    let resultIndex = 0;
+    const historyList = document.getElementById('historyList');
+    const historyButton = document.getElementById('historyButton');
+    let historyVisible = false;
+
+    document.getElementById('predictButton').addEventListener('click', function() {
+        const plane = document.getElementById('plane');
+        const logo = document.getElementById('logo');
+        const loadingText = document.getElementById('loadingText');
+        const rumorsText = document.getElementById('rumorsText');
+
+        // Apply zoom animation to the plane and shake animation to the logo
+        plane.style.animation = 'zoomInOut 1s infinite';
+        logo.style.animation = 'shake 0.5s infinite';
+
+        // Show loading screen with running rumors
+        loadingText.style.display = 'block';
+        document.body.style.backgroundColor = '#b30000'; // Change background to dark red
+
+        // Hide the result display initially
+        document.getElementById('resultDisplay').style.display = 'none';
+
+        // Simulate running rumors
+        let rumorInterval = setInterval(function() {
+            rumorsText.innerText = `${(Math.random() * 10).toFixed(2)}`;
+        }, 200); // Update every 200 milliseconds
+
+        // Hide loading text and show result after a delay
+        setTimeout(function() {
+            clearInterval(rumorInterval); // Stop the rumor simulation
+            loadingText.style.display = 'none'; // Hide loading screen
+            document.getElementById('resultDisplay').style.display = 'block'; // Show result display
+
+            // Get the current result
+            const finalResult = results[resultIndex];
+
+            // Display the final result
+            document.getElementById('resultButton').innerText = finalResult;
+
+            // Add the result to history
+            addToHistory(finalResult);
+
+            // Update the index for the next result
+            resultIndex = (resultIndex + 1) % results.length;
+        }, 1500); // 1.5 seconds delay
+    });
+
+    historyButton.addEventListener('click', function() {
+        historyVisible = !historyVisible;
+        document.getElementById('historyList').classList.toggle('hidden', !historyVisible);
+    });
+
+    function addToHistory(result) {
+        const listItem = document.createElement('li');
+        listItem.className = 'history-item';
+        listItem.style.backgroundColor = getRandomColor(); // Randomly color the history item
+        listItem.innerHTML = `<span>${result}</span>`;
+        historyList.appendChild(listItem);
+    }
+
+    // Terms and Conditions Button Functionality
+    const termsButton = document.getElementById('termsButton');
+    const termsPopup = document.getElementById('termsPopup');
+    const closeTerms = document.getElementById('closeTerms');
+
+    termsButton.addEventListener('click', function() {
+        termsPopup.style.display = 'block';
+    });
+
+    closeTerms.addEventListener('click', function() {
+        termsPopup.style.display = 'none';
+    });
+</script>
+
+</body>
+</html>
